@@ -925,14 +925,14 @@ var COINS = [
 ];
 
 /* ═════════════════════════ STATE ═════════════════════════ */
-var S = { xp:0, gold:0, done:{}, sfx:false, tier:0, sailing:false, sunk:0, tents:0, lang:"" };
+var S = { xp:0, gold:0, done:{}, sfx:true, tier:0, sailing:false, sunk:0, tents:0, lang:"" };
 var KEY = "mm_archipelago_v3";
 var booted = false;
 function load(){
   try{ var o = JSON.parse(localStorage.getItem(KEY) || "null"); if(o && typeof o === "object") absorb(o); }catch(e){}
 }
 function absorb(o){
-  S.xp = o.xp|0; S.gold = o.gold|0; S.done = o.done || {}; S.sfx = !!o.sfx; S.tier = o.tier|0;
+  S.xp = o.xp|0; S.gold = o.gold|0; S.done = o.done || {}; S.sfx = o.sfx !== false; S.tier = o.tier|0;
   S.sailing = !!o.sailing; S.sunk = o.sunk|0; S.tents = o.tents|0;
   S.lang = (o.lang === "ru" || o.lang === "en") ? o.lang : "";
 }
