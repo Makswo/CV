@@ -415,6 +415,24 @@ footer{margin-top:52px; padding-top:20px; border-top:1px solid var(--line); font
 .art .qstats{margin:0}
 .pair img{aspect-ratio:460/634; object-fit:cover; object-position:top}
 @media (prefers-reduced-motion: reduce){ .btn.gold,.btn.gold::after{animation:none} }
+/* reward motes fly from the tap to the ship */
+.mote{position:fixed; z-index:80; width:12px; height:12px; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle,#FFFFFF 0,#FFF1C2 35%,rgba(255,226,150,0) 72%); box-shadow:0 0 14px 5px rgba(255,236,190,.75)}
+.mote.gold{background:radial-gradient(circle,#FFF6DA 0,#FFD27A 40%,rgba(227,169,60,0) 74%); box-shadow:0 0 16px 6px rgba(255,190,80,.8)}
+.sea-status.bump{animation:fpbump .7s ease-out}
+@keyframes fpbump{0%{box-shadow:0 0 0 0 rgba(255,210,122,0); border-color:rgba(255,255,255,.07)}30%{box-shadow:0 0 22px 2px rgba(255,210,122,.65); border-color:rgba(255,210,122,.8)}100%{box-shadow:0 0 0 0 rgba(255,210,122,0)}}
+/* first-coin tutorial */
+.tap-hint{position:absolute; z-index:5; width:0; height:0; pointer-events:none}
+.tap-hand{position:absolute; left:14px; top:22px; width:40px; display:block; transform-origin:30% 5%; transform:rotate(-28deg);
+  filter:drop-shadow(0 4px 6px rgba(0,0,0,.55)); animation:taphand 1.5s ease-in-out infinite}
+.tap-hand svg{display:block; width:100%; height:auto}
+.tap-label{position:absolute; left:58px; top:44px; white-space:nowrap; font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:#2B1700; padding:6px 10px; border-radius:4px; background:linear-gradient(100deg,#E3A93C,#FFE6A0 50%,#E3A93C); box-shadow:0 0 16px rgba(255,190,80,.55)}
+.tap-label::before{content:""; position:absolute; left:-5px; top:50%; margin-top:-5px; border:5px solid transparent; border-left:0; border-right-color:#E3A93C}
+@keyframes taphand{0%,100%{transform:translate(10px,12px) rotate(-28deg)}45%{transform:translate(0,0) rotate(-28deg) scale(.92)}55%{transform:translate(0,0) rotate(-28deg) scale(.92)}}
+.coin3d.hinted::before{animation:hintring 1.5s ease-out infinite}
+@keyframes hintring{0%,40%{transform:scale(.6); opacity:0}50%{opacity:1}100%{transform:scale(1.5); opacity:0}}
+@media (prefers-reduced-motion: reduce){ .tap-hand,.coin3d.hinted::before{animation:none} }
 </style>
 <style>[hidden]{display:none!important}</style>
 </head>
@@ -678,7 +696,7 @@ en:{
   locFound:"Location discovered — ", secretFound:"Secret found — ",
   ach:"Achievement", journey:"The journey begins", chestOpen:"The chest is open",
   lvUp:"Level up", lvN:"Level {n}", fasterReload:"faster reload", shipUp:"Ship upgraded", maxRank:"MAX RANK",
-  collect:"Collect {n} gold", getXp:"collect XP", goTo:"Go to {n}",
+  collect:"Collect {n} gold", getXp:"collect XP", tapCoin:"Tap the coin", goTo:"Go to {n}",
   sec_moon:"The moon", sec_years:"Thirteen years", sec_star:"The bright star",
   moonLbl:"Something about the moon", starLbl:"An unusually bright star",
   sound:"Sound effects", reset:"Start over", lang:"Language", purse:"Gold",
@@ -724,7 +742,7 @@ ru:{
   locFound:"Открыта локация — ", secretFound:"Найден секрет — ",
   ach:"Достижение", journey:"Путешествие началось", chestOpen:"Сундук открыт",
   lvUp:"Новый уровень", lvN:"Уровень {n}", fasterReload:"быстрее перезарядка", shipUp:"Корабль улучшен", maxRank:"МАКС. РАНГ",
-  collect:"Собрать {n} золота", getXp:"получить опыт", goTo:"Перейти: {n}",
+  collect:"Собрать {n} золота", getXp:"получить опыт", tapCoin:"Нажмите на монету", goTo:"Перейти: {n}",
   sec_moon:"Луна", sec_years:"Тринадцать лет", sec_star:"Яркая звезда",
   moonLbl:"Что-то не так с луной", starLbl:"Необычно яркая звезда",
   sound:"Звуковые эффекты", reset:"Начать заново", lang:"Язык", purse:"Золото",
@@ -877,17 +895,17 @@ var ACHS = [
   { id:"ach_chest", n:{en:"Recruiter",ru:"Рекрутер"}, how:{en:"Open the chest.",ru:"Откройте сундук."} }
 ];
 var RANKS = [
-  {at:0,n:{en:"Castaway",ru:"Новичок"}},{at:120,n:{en:"Wanderer",ru:"Странник"}},{at:300,n:{en:"Scout",ru:"Разведчик"}},
-  {at:520,n:{en:"Pathfinder",ru:"Следопыт"}},{at:800,n:{en:"Navigator",ru:"Штурман"}},{at:1150,n:{en:"Harbormaster",ru:"Капитан порта"}},
-  {at:1550,n:{en:"Hiring Manager",ru:"Нанимающий менеджер"}}
+  {at:0,n:{en:"Castaway",ru:"Новичок"}},{at:60,n:{en:"Wanderer",ru:"Странник"}},{at:170,n:{en:"Scout",ru:"Разведчик"}},
+  {at:330,n:{en:"Pathfinder",ru:"Следопыт"}},{at:540,n:{en:"Navigator",ru:"Штурман"}},{at:800,n:{en:"Harbormaster",ru:"Капитан порта"}},
+  {at:1100,n:{en:"Hiring Manager",ru:"Нанимающий менеджер"}}
 ];
 var TIERS = [
   {at:0,n:{en:"Dinghy",ru:"Шлюпка"},adds:""},
-  {at:200,n:{en:"Sloop",ru:"Шлюп"},adds:{en:"+1 cannon · full hull and mainsails",ru:"+1 пушка · полный корпус и основные паруса"}},
-  {at:600,n:{en:"Brigantine",ru:"Бригантина"},adds:{en:"+1 cannon · foremast and jib",ru:"+1 пушка · фок-мачта и кливер"}},
-  {at:1200,n:{en:"Frigate",ru:"Фрегат"},adds:{en:"+1 cannon · rigging and crow's nest",ru:"+1 пушка · такелаж и воронье гнездо"}},
-  {at:2000,n:{en:"Galleon",ru:"Галеон"},adds:{en:"+1 cannon · sterncastle and mizzenmast",ru:"+1 пушка · ют и бизань-мачта"}},
-  {at:3000,n:{en:"Flagship",ru:"Флагман"},adds:{en:"+1 cannon · gold rail, crest and colours",ru:"+1 пушка · золотой фальшборт, герб и флаги"}}
+  {at:100,n:{en:"Sloop",ru:"Шлюп"},adds:{en:"+1 cannon · full hull and mainsails",ru:"+1 пушка · полный корпус и основные паруса"}},
+  {at:300,n:{en:"Brigantine",ru:"Бригантина"},adds:{en:"+1 cannon · foremast and jib",ru:"+1 пушка · фок-мачта и кливер"}},
+  {at:650,n:{en:"Frigate",ru:"Фрегат"},adds:{en:"+1 cannon · rigging and crow's nest",ru:"+1 пушка · такелаж и воронье гнездо"}},
+  {at:1150,n:{en:"Galleon",ru:"Галеон"},adds:{en:"+1 cannon · sterncastle and mizzenmast",ru:"+1 пушка · ют и бизань-мачта"}},
+  {at:1800,n:{en:"Flagship",ru:"Флагман"},adds:{en:"+1 cannon · gold rail, crest and colours",ru:"+1 пушка · золотой фальшборт, герб и флаги"}}
 ];
 var LOCNAME = {
   journal:{en:"Journal",ru:"Журнал"}, quests:{en:"Experience",ru:"Опыт"}, artifacts:{en:"Apps",ru:"Приложения"},
@@ -997,7 +1015,28 @@ function floatText(anchor, txt, cls){
 }
 
 /* ═════════════════════════ REWARDS ═════════════════════════ */
-function award(id, xp, gold, label){
+var lastTap = null;
+document.addEventListener("pointerdown", function(e){ lastTap = { x:e.clientX, y:e.clientY, t:Date.now() }; }, true);
+function boost(kind, amt, fx){
+  if(fx === "coin") return;                      /* the coin itself flies to the ship */
+  var from = lastTap && Date.now() - lastTap.t < 1500 ? lastTap : null;
+  lastTap = null;
+  if(!from || reduce){ Bay.hit(kind, amt); return; }
+  mote(from, kind, function(){ Bay.hit(kind, amt); });
+}
+function mote(from, kind, done){
+  var to = Bay.shipPoint(), m = document.createElement("div");
+  m.className = "mote" + (kind === "gold" ? " gold" : "");
+  m.style.left = from.x + "px"; m.style.top = from.y + "px";
+  document.body.appendChild(m);
+  if(!m.animate){ m.parentNode.removeChild(m); done(); return; }
+  var dx = to.x - from.x, dy = to.y - from.y, lift = Math.min(160, Math.abs(dy)*.35 + 40);
+  m.animate([{ transform:"translate(-50%,-50%) scale(.6)", opacity:.4 },
+             { transform:"translate(calc(-50% + " + dx*.4 + "px),calc(-50% + " + (dy*.4 - lift) + "px)) scale(1.25)", opacity:1, offset:.45 },
+             { transform:"translate(calc(-50% + " + dx + "px),calc(-50% + " + dy + "px)) scale(.7)", opacity:1 }],
+    { duration:Math.min(820, 420 + Math.hypot(dx, dy)*.35), easing:"cubic-bezier(.45,0,.55,1)" }).onfinish = function(){ if(m.parentNode) m.parentNode.removeChild(m); done(); };
+}
+function award(id, xp, gold, label, fx){
   if(S.done[id]) return false;
   var before = rankIndex(S.xp);
   S.done[id] = true; S.xp += xp||0; S.gold += gold||0;
@@ -1007,7 +1046,7 @@ function award(id, xp, gold, label){
   }
   if(gold) sfxGold(); else if(xp) sfxXp();
   if(!S.sailing){ S.sailing = true; Bay.setLive(true); }
-  Bay.celebrate(gold ? "gold" : "xp");
+  boost(gold ? "gold" : "xp", gold || xp, fx);
   afterChange(before);
   return true;
 }
@@ -1206,19 +1245,42 @@ function placeCoins(){
     b.addEventListener("click", function(){
       if(has(c.id)) return;
       b.classList.add("taken"); floatText(b, "+" + c.v + " " + t("gold"));
-      setTimeout(function(){ flyCoin(b); b.hidden = true; award(c.id, 0, c.v, null); }, 170);
+      killHint();
+      setTimeout(function(){ flyCoin(b, c.v); b.hidden = true; award(c.id, 0, c.v, null, "coin"); }, 170);
     });
     host.appendChild(b);
   });
 }
-function flyCoin(btn){
-  var a = btn.getBoundingClientRect(), p = $("purse").getBoundingClientRect(), c = document.createElement("div");
+var HAND = '<svg viewBox="0 0 44 54" aria-hidden="true"><g stroke="#2A1A10" stroke-width="1.8" stroke-linejoin="round">' +
+  '<rect x="15" y="2" width="9" height="27" rx="4.5" fill="#FBF1E1"/>' +
+  '<rect x="23" y="17" width="8" height="14" rx="4" fill="#FBF1E1"/><rect x="30" y="20" width="7.5" height="13" rx="3.75" fill="#FBF1E1"/>' +
+  '<path d="M9 30 Q4 26 6.5 22.5 Q9 20 13 24 L15 26 L15 22 L38 24 L38 36 Q38 47 27 47 L20 47 Q14 47 11 41 Z" fill="#FBF1E1"/>' +
+  '<rect x="13" y="45" width="24" height="7" rx="2" fill="#E3A93C"/></g>' +
+  '<path d="M18 6 v8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".7"/></svg>';
+var hintEl = null;
+function placeHint(){
+  killHint();
+  if(countDone(COIN_IDS) > 0) return;
+  var coin = document.querySelector('#scene > .coin3d'); if(!coin) return;
+  coin.classList.add("hinted");
+  hintEl = document.createElement("div"); hintEl.className = "tap-hint"; hintEl.setAttribute("aria-hidden", "true");
+  hintEl.style.left = coin.style.left; hintEl.style.top = coin.style.top;
+  hintEl.innerHTML = '<span class="tap-hand">' + HAND + '</span><span class="tap-label">' + t("tapCoin") + '</span>';
+  coin.parentNode.appendChild(hintEl);
+}
+function killHint(){
+  if(hintEl && hintEl.parentNode) hintEl.parentNode.removeChild(hintEl); hintEl = null;
+  Array.prototype.forEach.call(document.querySelectorAll(".coin3d.hinted"), function(c){ c.classList.remove("hinted"); });
+}
+function flyCoin(btn, v){
+  var a = btn.getBoundingClientRect(), p = Bay.shipPoint(), c = document.createElement("div");
+  p = { left:p.x - 6, top:p.y, height:0 };
   c.className = "coin-fly"; c.style.left = a.left + "px"; c.style.top = a.top + "px"; c.style.width = a.width + "px"; c.style.height = a.height + "px";
   document.body.appendChild(c);
-  if(!c.animate || reduce){ c.parentNode.removeChild(c); pulse($("purse")); return; }
+  if(!c.animate || reduce){ c.parentNode.removeChild(c); pulse($("purse")); Bay.hit("gold", v); return; }
   var dx = p.left + 6 - (a.left + a.width/2), dy = p.top + p.height/2 - (a.top + a.height/2);
   c.animate([{ transform:"translate(0,0) scale(1)" },{ transform:"translate(" + dx*.45 + "px," + (dy*.45 - 80) + "px) scale(.9) rotateY(540deg)", offset:.5 },{ transform:"translate(" + dx + "px," + dy + "px) scale(.4) rotateY(1080deg)", opacity:.85 }],
-    { duration:760, easing:"cubic-bezier(.4,0,.6,1)" }).onfinish = function(){ if(c.parentNode) c.parentNode.removeChild(c); pulse($("purse")); };
+    { duration:700, easing:"cubic-bezier(.4,0,.6,1)" }).onfinish = function(){ if(c.parentNode) c.parentNode.removeChild(c); pulse($("purse")); Bay.hit("gold", v); };
 }
 
 /* every résumé action counts toward "% explored" */
@@ -1245,11 +1307,16 @@ function statusLine(F){
   var c = F.cannons, cn = LANG === "ru" ? plural(c, "пушка", "пушки", "пушек") : (c === 1 ? "cannon" : "cannons");
   return L(TIERS[F.T].n) + " · " + c + " " + cn + " · " + t("reload") + " " + num(F.reload, 1) + " " + t("sec") + " · " + L(SHOT_NAMES)[F.L - 1];
 }
+function countDone(list){ var n = 0; for(var i = 0; i < list.length; i++){ if(S.done[list[i]]) n++; } return n; }
+var COIN_IDS = COINS.map(function(c){ return c.id; });
 function firepower(){
-  var T = S.tier, L = level();
-  return { T:T, L:L, cannons:1 + T, reload:2.4 * Math.pow(.76, L - 1), dmg:1 + Math.floor((L - 1) / 3),
-    flight:.95 - .07 * (L - 1), p:(T / 5 + (L - 1) / 6) / 2, pct:Math.round((T + L) / 12 * 100),
-    scale:.8 + .3 * Math.min(1, S.xp / 1800) };
+  var T = S.tier, L = level(), li = L - 1, lf = li;
+  if(li < RANKS.length - 1) lf = li + (S.xp - RANKS[li].at) / (RANKS[li + 1].at - RANKS[li].at);
+  var gMax = TIERS[TIERS.length - 1].at, xMax = RANKS[RANKS.length - 1].at;
+  var g = Math.min(1, S.gold / gMax), x = Math.min(1, S.xp / xMax), p = (g + x) / 2;
+  return { T:T, L:L, lf:lf, cannons:1 + T, reload:2.4 * Math.pow(.76, lf), dmg:1 + Math.floor(li / 3),
+    flight:.95 - .07 * lf, p:p, pct:Math.max(3, Math.round(Math.pow(p, .7) * 100)),
+    scale:.8 + .32 * x, coins:countDone(COIN_IDS), glows:countDone(GLOWS) };
 }
 
 var Bay = (function(){
@@ -1373,6 +1440,42 @@ var Bay = (function(){
     }
   }
 
+  /* one gold stud per coin, one pennant per golden phrase — each new one pops in */
+  var popC = [], popG = [], seenC = -1, seenG = -1;
+  var STUDS_D = [[-20,2.6],[-11,2.6],[-2,2.6],[7,2.6],[16,2.6]];
+  var STUDS = [[-42,3.6],[-31,3.6],[-20,3.6],[-7,3.6],[7,3.6],[20,3.6],[33,3.6],[44,3.6],[-48,-12.6],[-24,-12.6],[24,-12.6],[48,-12.6]];
+  var BUNT = ["#E8552F","#FFD27A","#F4EBDD","#5B92DB"];
+  function popK(t0){ if(t0 == null) return 1; var k = Math.min(1, (time - t0) / .4); return k * (1 + .7*Math.sin(k*Math.PI)); }
+  function trackPops(){
+    if(seenC < 0){ seenC = FP.coins; seenG = FP.glows; return; }
+    for(; seenC < FP.coins; seenC++) popC[seenC] = time;
+    for(; seenG < FP.glows; seenG++) popG[seenG] = time;
+    if(FP.coins < seenC) seenC = FP.coins; if(FP.glows < seenG) seenG = FP.glows;
+  }
+  function qpt(a, b, t, sag){ var mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 + sag, u = 1 - t;
+    return [u*u*a[0] + 2*u*t*mx + t*t*b[0], u*u*a[1] + 2*u*t*my + t*t*b[1]]; }
+  function decor(tier){
+    var top = tier === 0 ? [0,-45] : [0,-67], ends = tier === 0 ? [[29,-14],[-26,-9.5]] : [[60,-21],[-54,-13]];
+    var per = tier === 0 ? 5 : 9, nG = Math.min(FP.glows, per*2), k;
+    if(nG > 0){
+      ctx.strokeStyle = "rgba(244,235,221,.7)"; ctx.lineWidth = .45;
+      for(var sd = 0; sd < 2; sd++){ if(sd === 1 && nG < 2) break; var a = top, b = ends[sd]; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.quadraticCurveTo((a[0]+b[0])/2, (a[1]+b[1])/2 + 5, b[0], b[1]); ctx.stroke(); }
+      for(k = 0; k < nG; k++){
+        var side = k % 2, slot = Math.floor(k / 2), pt = qpt(top, ends[side], (slot + 1) / (per + 1), 5), sc = popK(popG[k]);
+        ctx.save(); ctx.translate(pt[0], pt[1]); ctx.scale(sc, sc);
+        ctx.fillStyle = BUNT[k % 4]; ctx.beginPath(); ctx.moveTo(-2.3, 0); ctx.lineTo(2.3, 0); ctx.lineTo(0, 4.8); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+    }
+    var slots = tier === 0 ? STUDS_D : STUDS, nC = Math.min(FP.coins, slots.length);
+    for(k = 0; k < nC; k++){
+      var st = slots[k], s2 = popK(popC[k]);
+      if(popC[k] != null && time - popC[k] < .6) glow(st[0], st[1], 7, "rgba(255,215,120,.95)", 1 - (time - popC[k]) / .6);
+      dot(st[0], st[1], 2.1*s2, "#F2C14E"); ctx.strokeStyle = "#7A4A10"; ctx.lineWidth = .45; ctx.stroke();
+      dot(st[0] - .5*s2, st[1] - .55*s2, .55*s2, "#FFF1C2");
+    }
+  }
+
   function pirateBody(gal){
     var pal = PIR;
     if(gal){
@@ -1444,6 +1547,7 @@ var Bay = (function(){
     if(ship.glow > 0) glow(ship.x, WL - 32*sc, 72*sc, "rgba(255,210,122,.85)", ship.glow*.55);
     ctx.save(); ctx.translate(ship.x, WL + 2 + ship.bob); ctx.rotate(rot); ctx.scale(sc, sc);
     drawMine(S.tier, FP.cannons);
+    decor(S.tier);
     ctx.restore();
   }
 
@@ -1556,6 +1660,31 @@ var Bay = (function(){
     if(kind === "level"){ ship.glow = Math.max(ship.glow, .6); ring(ship.x, WL + 1, 16*sc); }
   }
 
+  function salute(n){
+    var sc = shipScale();
+    for(var k = 0; k < n; k++){
+      var px = (S.tier === 0 ? 0 : PORTS[k % PORTS.length])*sc, x0 = ship.x + px, y0 = WL + 2 + ship.bob - (S.tier === 0 ? 3.6 : 6.6)*sc;
+      var x1 = ship.x + rnd(-70, 70), y1 = rnd(8, 26);
+      balls.push({ mine:true, salute:true, x0:x0, y0:y0, x1:x1, y1:y1, t:-k*.08, T:.55 + rnd(0, .15), h:10, L:FP.L });
+      muzzle(x0, y0, x1 > x0 ? 1 : -1, FP.L);
+    }
+  }
+  function hit(kind, amt){
+    FP = firepower(); trackPops();
+    var sc = shipScale();
+    celebrate(kind === "gold" ? "gold" : "xp");
+    ship.glow = Math.max(ship.glow, .75);
+    for(var k = 0; k < 10; k++) sparkle(ship.x + rnd(-30, 30)*sc, WL - rnd(8, 50)*sc, kind === "gold" ? GOLD[k % 3] : "#FFF1C2");
+    if(amt) text(ship.x, WL - 74*sc, "+" + amt + (kind === "gold" ? "" : " XP"), kind === "gold" ? "#FFD27A" : "#FFF1C2");
+    if(pickTarget()){ for(var c = 0; c < FP.cannons; c++) ship.queue.push({ at:time + .05 + c*.07, n:c }); ship.reload = FP.reload; }
+    else salute(Math.min(3, FP.cannons));
+    ui(); var st = $("seaStatus"); st.classList.remove("bump"); void st.offsetWidth; st.classList.add("bump");
+  }
+  function shipPoint(){
+    var r = sea.getBoundingClientRect(), sc = shipScale();
+    return { x:r.left + ship.x*U, y:r.top + (WL - 26*sc)*U };
+  }
+
   /* ── enemies ── */
   function spawn(){
     var side = Math.random() < .5 ? -1 : 1, tents = 0;
@@ -1625,13 +1754,14 @@ var Bay = (function(){
   }
   function updateBall(b, dt){
     var px = b.x, py = b.y;
-    b.t += dt; var k = Math.min(1, b.t / b.T);
+    b.t += dt; if(b.t < 0) return; var k = Math.min(1, b.t / b.T);
     b.x = lerp(b.x0, b.x1, k); b.y = lerp(b.y0, b.y1, k) - b.h*4*k*(1 - k);
     b.px = px == null ? b.x0 : px; b.py = py == null ? b.y0 : py;
-    if(b.mine) trail(b.x, b.y, b.L);
+    if(b.mine) trail(b.x, b.y, b.salute ? Math.max(3, b.L) : b.L);
     if(k >= 1){ b.dead = true; impact(b); }
   }
   function impact(b){
+    if(b.salute){ flash(b.x, b.y, 6 + b.L, "255,220,140"); for(var q = 0; q < 10 + b.L*2; q++) sparkle(b.x, b.y, GOLD[q % 3]); for(q = 0; q < 6; q++) spark(b.x, b.y, EMBER[q % 3], 26); return; }
     if(!b.mine){ boom(b.x, b.y, 1, true); hitShip(b.x0 < ship.x ? -1 : 1, .35); return; }
     var f = b.tgt; f.pending = Math.max(0, f.pending - b.dmg);
     if(!f.dead && Math.abs(f.x - b.x1) < 24){
@@ -1655,7 +1785,7 @@ var Bay = (function(){
 
   /* ── loop ── */
   function update(dt){
-    FP = firepower();
+    FP = firepower(); trackPops();
     ship.rv += (-ship.roll*20 - ship.rv*4.2)*dt; ship.roll += ship.rv*dt*MOTION;
     ship.glow = Math.max(0, ship.glow - dt*.8);
     if(live){
@@ -1697,6 +1827,7 @@ var Bay = (function(){
     ctx.quadraticCurveTo(x, y, x - r*2.2, y); ctx.quadraticCurveTo(x, y, x, y - r*2.2); ctx.fill();
   }
   function drawBall(b){
+    if(b.t < 0 || b.x == null) return;
     if(!b.mine){ dot(b.x, b.y, 1.5, "#141418"); return; }
     var L = b.L;
     if(L >= 7){
@@ -1735,7 +1866,7 @@ var Bay = (function(){
     });
   }
   function drawTexts(){
-    ctx.font = "700 5px 'Space Mono', ui-monospace, monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = "700 5.5px 'Space Mono', 'IBM Plex Mono', ui-monospace, monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     texts.forEach(function(t){
       ctx.globalAlpha = Math.min(1, t.life*2);
       ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.fillText(t.s, t.x + .4, t.y + .4);
@@ -1776,7 +1907,7 @@ var Bay = (function(){
     resize:resize,
     start:function(){ resize(); counts(); ui(); requestAnimationFrame(frame); },
     setLive:function(v){ if(v && !live) spawnIn = 1.4; live = !!v; ui(); },
-    celebrate:celebrate,
+    celebrate:celebrate, hit:hit, shipPoint:shipPoint,
     refresh:function(){ FP = firepower(); ui(); }
   };
 })();
@@ -1849,7 +1980,7 @@ function watchSections(){
 
 /* ═════════════════════════ LANGUAGE SWITCH ═════════════════════════ */
 function renderAll(){
-  renderStatic(); buildResume(); wireGlows(); placeCoins();
+  renderStatic(); buildResume(); wireGlows(); placeCoins(); placeHint();
   wireSecret($("secretYears"), "sec_years");
   paintStart(); paintChest(); paintPins(); checkAchievements(true);
 }
